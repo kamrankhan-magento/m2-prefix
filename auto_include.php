@@ -4,7 +4,7 @@ if (!isset($_GET) || empty($_GET['op'])){
 }
 $vSnippetName = $_GET['op'];
 $vSnippetFile = __DIR__ . "/snippets/{$vSnippetName}.php";
-$vKnitPath = __DIR__ . "/lib/kint.php";
+$vKnitPath = __DIR__ . "/lib/kint_inc.php";
 if (!file_exists($vSnippetFile)){
     $vCorePreSnippet = __DIR__ . "/snippets_core_pre/{$vSnippetName}.php";
     if (file_exists($vCorePreSnippet)){
@@ -15,9 +15,9 @@ if (!file_exists($vSnippetFile)){
     if ($_SERVER['REQUEST_URI'] == '/?op=' . $_GET['op']){
         throw new Exception(($vSnippetFile) . 'does not exist');
     }
-    require $vKnitPath;
     return ;
 }
+require $vKnitPath;
 /**
  * Public alias for the application entry point
  *
