@@ -4,6 +4,7 @@ if (!isset($_GET) || empty($_GET['op'])){
 }
 $vSnippetName = $_GET['op'];
 $vSnippetFile = __DIR__ . "/snippets/{$vSnippetName}.php";
+require_once __DIR__ . "/lib/fatal_inc.php";;
 $vKnitPath = __DIR__ . "/lib/kint_inc.php";
 if (!file_exists($vSnippetFile)){
     $vCorePreSnippet = __DIR__ . "/snippets_core_pre/{$vSnippetName}.php";
