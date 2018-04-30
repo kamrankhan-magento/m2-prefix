@@ -1,14 +1,25 @@
 <?php
 
-setStateAdminHtml();
+$magentoInc->setAdminHtml();
 
 Class baseUrl{
+    /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
+    private $scopeConfig;
+
     function __construct(\Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig)
     {
-        d($scopeConfig->getValue('web/unsecure/base_url'));
+        $this->scopeConfig = $scopeConfig;
+    }
+    public function showValue()
+    {
+        return $this->scopeConfig->getValue('web/unsecure/base_url');
     }
 };
-getObjectFromName('\baseUrl');
+/** @var \baseUrl $baseUrl */
+$baseUrl = $magentoInc->getObjectFromName('\baseUrl');
+d($baseUrl->showValue());
 
 /**
  * Alternative approach without DI

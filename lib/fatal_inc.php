@@ -11,7 +11,7 @@ function __fatalHandler()
             return ;
         }
         breakIfNoErrorSuppression($file);
-        d($error);
+        var_dump($error);
         showTrace();
     }
 }
@@ -23,13 +23,14 @@ function showTrace()
         //Not working in PHP 7
         //xdebug_print_function_stack();
         //not working in PHP 7
-        ErrorPrinting::printTrace(xdebug_get_function_stack());
-        $vErrorDump = ob_get_clean();
+//        ErrorPrinting::printTrace(xdebug_get_function_stack());
+//        $vErrorDump = ob_get_clean();
+        var_dump(xdebug_get_function_stack());
     }
     else{
         $vErrorDump = 'Could not get error dump because xdebug not enabled';
+        echo $vErrorDump;
     }
-    echo $vErrorDump;
 }
 function breakExecution()
 {
