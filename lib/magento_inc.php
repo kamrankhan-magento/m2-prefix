@@ -1,5 +1,7 @@
 <?php
-Class MagentoInc {
+
+Class MagentoInc
+{
     /**
      * @var \Magento\Framework\App\State
      */
@@ -41,28 +43,54 @@ Class MagentoInc {
         $this->flatState = $flatState;
         $this->indexerRegistry = $indexerRegistry;
     }
+
     public function setAdminHtml()
     {
-        if ($this->bStateSet){
+        if ($this->bStateSet) {
             return false;
         }
         $this->state->setAreaCode('adminhtml');
         $this->storeManager->setCurrentStore('admin');
-        $this->registry->register('isSecureArea',true);
+        $this->registry->register('isSecureArea', true);
     }
+
     public function notUseFlat()
     {
         /** @var \Magento\Indexer\Model\Indexer\DependencyDecorator $productFlatIndexer */
         $productFlatIndexer = $this->indexerRegistry->get($this->flatState::INDEXER_ID);
         $productFlatIndexer->invalidate();
     }
+
     public function getObjectFromName($vClass)
     {
         return $this->objectManager->get($vClass);
     }
-};
 
-if (!isset($app)){
+    public static function largeCacheResponse(Closure $executeToCache, $vCacheId)
+    {
+        $vPath = dirname(__DIR__) . "/snippets/json/$vCacheId.json";
+        $aDecoded = null;
+        if (file_exists($vPath)) {
+            $aDecoded = json_decode(file_get_contents($vPath),true);
+        }
+        else{
+            $vDir = dirname($vPath);
+            if (!file_exists($vDir)) {
+                mkdir($vDir, 0777, true);
+            }
+            touch($vPath);
+        }
+        if (!is_array($aDecoded)){
+            $aDecoded = $executeToCache();
+            file_put_contents($vPath, json_encode($aDecoded,JSON_PRETTY_PRINT));
+        }
+        return $aDecoded;
+    }
+}
+
+;
+
+if (!isset($app)) {
     echo "<pre>";
     debug_print_backtrace();
     echo "</pre>";
@@ -70,7 +98,7 @@ if (!isset($app)){
     die;
 }
 /** @var \MagentoInc $magentoInc */
-$magentoInc =  $app->getObjectManager()->create('\MagentoInc');
+$magentoInc = $app->getObjectManager()->create('\MagentoInc');
 function setStateAdminHtml()
 {
     global $magentoInc;
