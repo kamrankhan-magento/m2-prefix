@@ -110,3 +110,4 @@ function getObjectFromName($vClass)
     global $magentoInc;
     return $magentoInc->getObjectFromName($vClass);
 }
+require_once __DIR__ . '/CreateOrder.php';
