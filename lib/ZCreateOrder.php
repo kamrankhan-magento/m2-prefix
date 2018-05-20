@@ -34,6 +34,18 @@ Class ZCreateOrder
      * @var \Magento\Sales\Model\Service\OrderService
      */
     private $orderService;
+    /**
+     * @var \Magento\GiftCardAccount\Helper\Data
+     */
+    private $helperGiftCard;
+    /**
+     * @var \Magento\Framework\Pricing\PriceCurrencyInterface
+     */
+    private $priceCurrency;
+    /**
+     * @var \Magento\GiftCardAccount\Model\GiftcardaccountFactory
+     */
+    private $fAccountGiftCard;
 
     public function __construct(
         \Magento\Store\Model\StoreManagerInterface $storeManager,
@@ -42,7 +54,10 @@ Class ZCreateOrder
         \Magento\Quote\Model\QuoteFactory $quote,
         \Magento\Quote\Model\QuoteManagement $quoteManagement,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
+        \Magento\GiftCardAccount\Model\GiftcardaccountFactory $fAccountGiftCard,
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
+        \Magento\GiftCardAccount\Helper\Data $helperGiftCard,
+        \Magento\Framework\Pricing\PriceCurrencyInterface $priceCurrency,
         \Magento\Sales\Model\Service\OrderService $orderService
     )
     {
@@ -54,6 +69,9 @@ Class ZCreateOrder
         $this->customerFactory = $customerFactory;
         $this->customerRepository = $customerRepository;
         $this->orderService = $orderService;
+        $this->helperGiftCard = $helperGiftCard;
+        $this->priceCurrency = $priceCurrency;
+        $this->fAccountGiftCard = $fAccountGiftCard;
     }
 
     /**
@@ -67,7 +85,10 @@ Class ZCreateOrder
     public function createMageOrder($orderData)
     {
         $store = $this->storeManager->getStore();
-        $websiteId = $this->storeManager->getStore()->getWebsiteId();
+        $websiteId = $orderData['website_id'];
+        $website = $this->storeManager->getWebsite($websiteId);
+        $oDefaultStore = $website->getDefaultStore();
+        $this->storeManager->setCurrentStore($oDefaultStore->getCode());
         $customer = $this->customerFactory->create();
         $customer->setWebsiteId($websiteId);
         $customer->loadByEmail($orderData['email']);// load customet by email address
@@ -112,12 +133,18 @@ Class ZCreateOrder
         $shippingAddress->setCollectShippingRates(true)
             ->collectShippingRates()
             ->setShippingMethod($vShippingMethodCode); //shipping method
-        $quote->setPaymentMethod('checkmo'); //payment method
         $quote->setInventoryProcessed(false); //not effetc inventory
+        $quote->setWebsite($website);
+        $quote->setStoreId($oDefaultStore->getId());
         $quote->save(); //Now Save quote and your quote is ready
 
+        if (!empty($orderData['giftCardCode'])){
+            $this->applyGiftCardFromCode($orderData['giftCardCode'],$quote);
+        }
         // Set Sales Order Payment
-        $quote->getPayment()->importData(['method' => 'checkmo']);
+        $quote->getPayment()->importData(
+            $orderData['payment']
+        );
 
         // Collect Totals & Save Quote
         $quote->collectTotals()->save();
@@ -158,7 +185,21 @@ Class ZCreateOrder
             'items'            => [ //array of product which order you want to create
                                     ['product_id' => '1', 'qty' => 1],
                                     ['product_id' => '2', 'qty' => 2]
-            ]
+            ],
+            'website_id' => 1,
+//            'payment'=>['method' => 'checkmo'],
+            'payment'=>['method' => 'pinpay'],
+            'giftCardCode'=>'GIFTCARD-1',
         ];
+    }
+    protected function applyGiftCard(\Magento\GiftCardAccount\Model\Giftcardaccount $model,
+                                  \Magento\Quote\Model\Quote $quote)
+    {
+        return $model->addToCart(true,$quote);
+    }
+    protected function applyGiftCardFromCode($vCode,\Magento\Quote\Model\Quote $quote)
+    {
+       $giftCard =  $this->fAccountGiftCard->create()->loadByCode($vCode);
+       return $this->applyGiftCard($giftCard,$quote);
     }
 }

@@ -52,6 +52,7 @@ Class MagentoInc
         $this->state->setAreaCode('adminhtml');
         $this->storeManager->setCurrentStore('admin');
         $this->registry->register('isSecureArea', true);
+        $this->bStateSet = true;
     }
 
     public function notUseFlat()
@@ -66,11 +67,11 @@ Class MagentoInc
         return $this->objectManager->get($vClass);
     }
 
-    public static function largeCacheResponse(Closure $executeToCache, $vCacheId)
+    public static function largeCacheResponse(Closure $executeToCache, $vCacheId,$bResetCache = false)
     {
         $vPath = dirname(__DIR__) . "/snippets/json/$vCacheId.json";
         $aDecoded = null;
-        if (file_exists($vPath)) {
+        if (!$bResetCache &&  file_exists($vPath)) {
             $aDecoded = json_decode(file_get_contents($vPath),true);
         }
         else{
@@ -110,4 +111,5 @@ function getObjectFromName($vClass)
     global $magentoInc;
     return $magentoInc->getObjectFromName($vClass);
 }
-require_once __DIR__ . '/CreateOrder.php';
+require_once __DIR__ . '/ZCreateOrder.php';
+require_once __DIR__ . '/ZCreateGiftCard.php';

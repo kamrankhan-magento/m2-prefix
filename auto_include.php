@@ -67,5 +67,6 @@ $bootstrap = \Magento\Framework\App\Bootstrap::create(BP, $params);
 /** @var TestApp $app */
 $app = $bootstrap->createApplication('TestApp');
 require_once __DIR__ . "/lib/magento_inc.php";
+$bExecuteNow = true;
 require $vSnippetFile;
 die;
