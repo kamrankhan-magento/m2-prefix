@@ -84,7 +84,7 @@ Class ZCreateOrder
      */
     public function createMageOrder($orderData)
     {
-        $store = $this->storeManager->getStore();
+//        $store = $this->storeManager->getStore();
         $websiteId = $orderData['website_id'];
         $website = $this->storeManager->getWebsite($websiteId);
         $oDefaultStore = $website->getDefaultStore();
@@ -95,7 +95,7 @@ Class ZCreateOrder
         if (!$customer->getEntityId()) {
             //If not avilable then create this customer
             $customer->setWebsiteId($websiteId)
-                ->setStore($store)
+                ->setStore($oDefaultStore)
                 ->setFirstname($orderData['shipping_address']['firstname'])
                 ->setLastname($orderData['shipping_address']['lastname'])
                 ->setEmail($orderData['email'])
@@ -103,7 +103,7 @@ Class ZCreateOrder
             $customer->save();
         }
         $quote = $this->quote->create(); //Create object of quote
-        $quote->setStore($store); //set store for which you create quote
+        $quote->setStore($oDefaultStore); //set store for which you create quote
         // if you have allready buyer id then you can load customer directly
         $customer = $this->customerRepository->getById($customer->getEntityId());
         $quote->setCurrency();
@@ -112,7 +112,7 @@ Class ZCreateOrder
         //add items in quote
         foreach ($orderData['items'] as $item) {
             $product = $this->product->load($item['product_id']);
-            if (isset($item['price'])){
+            if (isset($item['price'])) {
                 $product->setPrice($item['price']);
             }
             $quote->addProduct(
@@ -126,8 +126,7 @@ Class ZCreateOrder
         $quote->getShippingAddress()->addData($orderData['shipping_address']);
 
         // Collect Rates and Set Shipping & Payment Method
-        $vShippingMethodCode= 'flatrate_flatrate';
-//        $vShippingMethodCode= 'freeshipping_freeshipping';
+        $vShippingMethodCode = $orderData['shipping_method'];
 
         $shippingAddress = $quote->getShippingAddress();
         $shippingAddress->setCollectShippingRates(true)
@@ -138,8 +137,8 @@ Class ZCreateOrder
         $quote->setStoreId($oDefaultStore->getId());
         $quote->save(); //Now Save quote and your quote is ready
 
-        if (!empty($orderData['giftCardCode'])){
-            $this->applyGiftCardFromCode($orderData['giftCardCode'],$quote);
+        if (!empty($orderData['giftCardCode'])) {
+            $this->applyGiftCardFromCode($orderData['giftCardCode'], $quote);
         }
         // Set Sales Order Payment
         $quote->getPayment()->importData(
@@ -157,7 +156,7 @@ Class ZCreateOrder
         if ($order->getEntityId()) {
             $result['order_id'] = $order->getRealOrderId();
             $result['increment_id'] = $order->getIncrementId();
-            $result['data'] = $order->getData();
+            $result['data'] = $this->cleanArray($order->getData());
         }
         else {
             $result = ['error' => 1, 'msg' => 'Your custom message'];
@@ -165,11 +164,28 @@ Class ZCreateOrder
         return $result;
     }
 
+    public function cleanArray(array $aData)
+    {
+        return array_map(function ($element) {
+            if (is_object($element)){
+                if (is_callable([$element,'getData'])){
+                    $element = $element->getData();
+                }
+            }
+            return is_object($element) ? @json_decode(@json_encode($element),true) : (is_array($element) ? $this->cleanArray($element) : $element);
+        }, $aData);
+    }
+
+
     protected function sampleOrderData()
     {
         return [
             'currency_id'      => 'USD',
             'email'            => 'test@webkul.com', //buyer email id
+            //select distinct code from quote_shipping_rate;
+            //        'shipping_method'  => 'flatrate_flatrate',
+            //        'shipping_method'  => 'standard',
+            'shipping_method'  => 'freeshipping_freeshipping',
             'shipping_address' => [
                 'firstname'            => 'jhon', //address Details
                 'lastname'             => 'Deo',
@@ -186,20 +202,22 @@ Class ZCreateOrder
                                     ['product_id' => '1', 'qty' => 1],
                                     ['product_id' => '2', 'qty' => 2]
             ],
-            'website_id' => 1,
-//            'payment'=>['method' => 'checkmo'],
-            'payment'=>['method' => 'pinpay'],
-            'giftCardCode'=>'GIFTCARD-1',
+            'website_id'       => 1,
+            //            'payment'=>['method' => 'checkmo'],
+            'payment'          => ['method' => 'pinpay'],
+            'giftCardCode'     => 'GIFTCARD-1',
         ];
     }
+
     protected function applyGiftCard(\Magento\GiftCardAccount\Model\Giftcardaccount $model,
-                                  \Magento\Quote\Model\Quote $quote)
+                                     \Magento\Quote\Model\Quote $quote)
     {
-        return $model->addToCart(true,$quote);
+        return $model->addToCart(true, $quote);
     }
-    protected function applyGiftCardFromCode($vCode,\Magento\Quote\Model\Quote $quote)
+
+    protected function applyGiftCardFromCode($vCode, \Magento\Quote\Model\Quote $quote)
     {
-       $giftCard =  $this->fAccountGiftCard->create()->loadByCode($vCode);
-       return $this->applyGiftCard($giftCard,$quote);
+        $giftCard = $this->fAccountGiftCard->create()->loadByCode($vCode);
+        return $this->applyGiftCard($giftCard, $quote);
     }
 }
