@@ -1,0 +1,77 @@
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
+<body>
+<script>
+
+</script>
+<script id="entry-template" type="text/x-handlebars-template">
+    <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <preference for="Psr\Log\LoggerInterface" type="{{type_name_handler}}"/>
+    <virtualType name="{{type_name_handler}}" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">{{filename}}</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="{{type_name_logger}}" type="Monolog\Logger">
+        <!--
+            @see \Monolog\Logger::__construct()
+            vendor/monolog/monolog/src/Monolog/Logger.php:141
+
+            for example of logging in magento 2 base see
+            vendor/magento/magento2-base/app/etc/di.xml:205
+
+            and vendor/magento/module-support/etc/di.xml:9
+        -->
+        <arguments>
+            <argument name="name" xsi:type="string">{{name}}</argument>
+            <argument name="handlers" xsi:type="array">
+                <!--
+
+                this name is basically for unique indexing to maintain list of handlers
+                {   "system": {"instance": "Magento\Framework\Logger\Handler\System"},
+                    "debug": {"instance": "Magento\Framework\Logger\Handler\Debug"}     }
+                -->
+                <item name="base_logging" xsi:type="object">{{type_name_handler}}</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="{{target_class}}">
+        <arguments>
+            <argument name="logger" xsi:type="object">{{type_name_logger}}</argument>
+        </arguments>
+    </type>
+</config>
+</script>
+<textarea rows="25" cols="50" id="input">
+
+</textarea>
+<textarea cols="100" rows="25" id="output"> some large</textarea>
+<script>
+    let input = {
+        type_name_logger: 'ZLoggable',
+        type_name_handler: 'ZLogHandler',
+        filename: '/var/log/z_custom.log',
+        target_class: 'NameSpace\\Module\\Model\\TargetClass',
+        name: 'z_custom',
+        //\Monolog\Logger::__construct
+        comments: 'name is just used as a prefix to line entry if multiple logs are writing on same file'
+    };
+    $('#input').val(JSON.stringify(input, null, 2));
+
+    function changeElement() {
+        let source = document.getElementById("entry-template").innerHTML;
+        let template = Handlebars.compile(source);
+        let input = JSON.parse($('#input').val());
+        let html = template(input);
+        $('#output').val(html.trim());
+    }
+    changeElement();
+    $('#input').on('change keyup paste', changeElement);
+
+</script>
+</body>
+</html>
