@@ -107,6 +107,7 @@ Class ZCreateOrder
         // if you have allready buyer id then you can load customer directly
         $customer = $this->customerRepository->getById($customer->getEntityId());
         $quote->setCurrency();
+        $quote->setData('authority_to_leave',1);
         $quote->assignCustomer($customer); //Assign quote to customer
 
         //add items in quote
