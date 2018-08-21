@@ -1,7 +1,36 @@
 <?php
+Class RequestNotFound {
+    private function sendResourceNotFound()
+    {
+        $vRequest = $_SERVER['REQUEST_URI'];
+        header("HTTP/1.0 404 Not Found");
+        echo "PHP continues $vRequest .\n";
+        die();
+    }
+    private function ignoreThisRequest()
+    {
+        $vRequest = $_SERVER['REQUEST_URI'];
+        if (in_array($vRequest,['/favicon.ico'])){
+            return true;
+        }
+    }
+    function process()
+    {
+     if ($this->ignoreThisRequest()){
+         $this->sendResourceNotFound();
+     }
+    }
+}
+$requestNotFound =  new \RequestNotFound();
+$requestNotFound->process();
+
+
+
 if (!isset($_GET) || empty($_GET['op'])){
     return ;
 }
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 $vSnippetName = $_GET['op'];
 $vSnippetFile = __DIR__ . "/snippets/{$vSnippetName}.php";
 require_once __DIR__ . "/lib/fatal_inc.php";
