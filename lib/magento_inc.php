@@ -57,6 +57,10 @@ Class MagentoInc
 
     public function notUseFlat()
     {
+        /**
+         * @see \Magento\Catalog\Model\ResourceModel\Product\Collection::isEnabledFlat()
+         * @see \Magento\Catalog\Model\Indexer\AbstractFlatState::isAvailable()
+         */
         /** @var \Magento\Indexer\Model\Indexer\DependencyDecorator $productFlatIndexer */
         $productFlatIndexer = $this->indexerRegistry->get($this->flatState::INDEXER_ID);
         $productFlatIndexer->invalidate();

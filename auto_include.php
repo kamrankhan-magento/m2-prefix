@@ -42,8 +42,8 @@ if (!file_exists($vSnippetFile)){
         require($vCorePreSnippet);
         exit;
     }
-    if ($_SERVER['REQUEST_URI'] == '/?op=' . $_GET['op']){
-        throw new Exception(($vSnippetFile) . 'does not exist');
+    if (strpos($_SERVER['REQUEST_URI'],'/?op=' . $_GET['op'])===0){
+        throw new Exception(($vSnippetFile) . ' does not exist');
     }
     return ;
 }
