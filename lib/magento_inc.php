@@ -104,6 +104,7 @@ if (!isset($app)) {
 }
 /** @var \MagentoInc $magentoInc */
 $magentoInc = $app->getObjectManager()->create('\MagentoInc');
+$GLOBALS['magentoInc'] = $magentoInc;
 function setStateAdminHtml()
 {
     global $magentoInc;
