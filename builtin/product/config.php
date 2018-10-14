@@ -13,14 +13,26 @@ $magentoInc->setAdminHtml();
 Class Config
 {
 
-    function __construct()
+    /**
+     * @var \Magento\ConfigurableProduct\Api\LinkManagementInterface
+     */
+    private $linkManagement;
+
+    function __construct(\Magento\ConfigurableProduct\Api\LinkManagementInterface $linkManagement)
     {
 
+        $this->linkManagement = $linkManagement;
     }
 
     public function showChildren()
     {
-        return 1;
+        $sku = $_GET['sku'];;
+        $childProducts =  $this->linkManagement->getChildren($sku);
+        $return = [];
+        foreach ($childProducts as $product) {
+            $return[] = $product->getId();
+        }
+        return $return;
     }
 }
 
