@@ -32,3 +32,6 @@ $action = $_GET['action'];
 if ($action == 'main_action') {
     !d($instanceName->mainFunction());
 }
+else{
+    throw new \Exception('no action filtered, you selected' . $action);
+}

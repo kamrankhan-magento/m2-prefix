@@ -32,7 +32,7 @@ Class Config
         foreach ($childProducts as $product) {
             $return[] = $product->getId();
         }
-        return $return;
+        return implode(', ',$return);
     }
 }
 
