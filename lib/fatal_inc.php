@@ -18,6 +18,9 @@ function __fatalHandler()
             //this is a dummy line so breakpoint can be placed on this line
             $debugThisLine = 1;
         }
+        if (!function_exists('xdebug_break')){
+            echo "<pre>";
+        }
         var_dump($error);
         showTrace();
     }
