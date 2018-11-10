@@ -3,9 +3,6 @@
  * To replace
  *
  * ClassName
- * $instanceName
- * main_action
- * mainFunction
  *
  */
 $magentoInc->setAdminHtml();
@@ -18,7 +15,7 @@ Class ClassName
 
     }
 
-    public function mainFunction()
+    public function main()
     {
         return 1;
     }
@@ -27,11 +24,13 @@ Class ClassName
 ;
 /** @var \ClassName $instanceName */
 $instanceName = $magentoInc->getObjectFromName('\ClassName');
-$action = $_GET['action'];
 
-if ($action == 'main_action') {
-    !d($instanceName->mainFunction());
-}
-else{
-    throw new \Exception('no action filtered, you selected' . $action);
+try {
+    !d(ZActionDetect::callMethod($instanceName));
+} catch (\ShowExceptionAsNormalMessage $e) {
+    $message = $e->errorData?:$e->getMessage();
+    if ($e->rawMessage){
+        echo $e->rawMessage;
+    }
+    !d($message);
 }

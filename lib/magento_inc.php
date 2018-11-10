@@ -118,3 +118,4 @@ function getObjectFromName($vClass)
 }
 require_once __DIR__ . '/ZCreateOrder.php';
 require_once __DIR__ . '/ZCreateGiftCard.php';
+require_once __DIR__ . '/action_detect.php';

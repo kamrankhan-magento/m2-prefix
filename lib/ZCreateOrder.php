@@ -133,7 +133,7 @@ Class ZCreateOrder
         $shippingAddress->setCollectShippingRates(true)
             ->collectShippingRates()
             ->setShippingMethod($vShippingMethodCode); //shipping method
-        $quote->setInventoryProcessed(false); //not effetc inventory
+//        $quote->setInventoryProcessed(false); //not effect inventory
         $quote->setWebsite($website);
         $quote->setStoreId($oDefaultStore->getId());
         $quote->save(); //Now Save quote and your quote is ready
