@@ -31,13 +31,15 @@ Class Dev
 }
 
 ;
-/** @var \Dev $dev */
-$dev = $magentoInc->getObjectFromName('\Dev');
-$action = $_GET['action'];
+/** @var \Dev $instanceName */
+$instanceName = $magentoInc->getObjectFromName('\Dev');
 
-if ($action == 'setup_ignore') {
-    !d($dev->setupIgnore());
-}
-else{
-    throw new \Exception('no action');
+try {
+    !d(ZActionDetect::callMethod($instanceName));
+} catch (\ShowExceptionAsNormalMessage $e) {
+    $message = $e->errorData?:$e->getMessage();
+    if ($e->rawMessage){
+        echo $e->rawMessage;
+    }
+    !d($message);
 }
