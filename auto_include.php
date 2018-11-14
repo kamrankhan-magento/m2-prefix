@@ -44,5 +44,6 @@ if (!isset($_GET) || empty($_GET['op'])) {
     return;
 }
 
+require_once __DIR__ . '/lib/ZReflection.php';
 require_once __DIR__ . '/snippet_include.php';
 die;

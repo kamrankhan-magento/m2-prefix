@@ -55,6 +55,17 @@ Class MagentoInc
         $this->bStateSet = true;
     }
 
+    public function setRestApiArea()
+    {
+        if ($this->bStateSet) {
+            return false;
+        }
+        $this->state->setAreaCode('webapi_rest');
+        $this->storeManager->setCurrentStore('admin');
+        $this->registry->register('isSecureArea', true);
+        $this->bStateSet = true;
+    }
+
     public function notUseFlat()
     {
         /**
@@ -117,5 +128,6 @@ function getObjectFromName($vClass)
     return $magentoInc->getObjectFromName($vClass);
 }
 require_once __DIR__ . '/ZCreateOrder.php';
+require_once __DIR__ . '/ZOrderView.php';
 require_once __DIR__ . '/ZCreateGiftCard.php';
 require_once __DIR__ . '/action_detect.php';
