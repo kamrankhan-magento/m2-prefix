@@ -37,6 +37,11 @@ Class ZInc
         require_once $vKnitPath;
         \Kint::$max_depth = $depth;
     }
+    static function InternalLog()
+    {
+        $vFunctionPath = __DIR__ . '/profile/InternalLog.php';
+        require_once $vFunctionPath;
+    }
 }
 
 
