@@ -15,6 +15,7 @@ Class ProductEav
     protected $bShowAttributeId = false;
     protected $bShowTable = false;
     protected $rowId ;
+    protected $rowField = 'row_id';
     /**
      * @var
      * customer_entity
@@ -34,14 +35,9 @@ Class ProductEav
 
     protected function init($bShowAttributeId, $bShowTable, $vEntityTable)
     {
-        $this->iProductId = $this->getProductId();
         $this->bShowAttributeId = $bShowAttributeId;
         $this->bShowTable= $bShowTable;
-        $this->vEntityTable = $vEntityTable;
-    }
-    protected function getProductId()
-    {
-        return 105580;
+        $this->vEntityTable = $this->resourceConnection->getTableName($vEntityTable);
     }
     protected function inspectFilter($vFieldToFilter)
     {
@@ -111,8 +107,9 @@ Class ProductEav
     {
         return  $aReturn = $this->getConnection()->fetchAll($vSql);
     }
-    public function inspectAll($filter='price')
+    public function inspectAll($productId, $filter)
     {
+        $this->iProductId = $productId;
         if ($filter=='*'){
             return $this->inspect();
         }
@@ -125,6 +122,15 @@ Class ProductEav
         $aReturn = $this->getRow($vSql);
         if (count(array_keys($aReturn)) == 1){
             return current($aReturn);
+        }
+        //old format does not have row_id
+        if (!empty($aReturn['entity_id']) && !isset($aReturn['row_id'])){
+            $this->rowField = 'entity_id';
+            $this->rowId = $aReturn['entity_id'];
+            return $aReturn;
+        }
+        if (empty($aReturn['row_id'])){
+            throw new \Exception('row_id is empty ' . json_encode($aReturn,JSON_PRETTY_PRINT));
         }
         $this->rowId = $aReturn['row_id'];
         return $aReturn;
@@ -154,7 +160,7 @@ Class ProductEav
 
     protected function inspectEavTable($vTable)
     {
-        $vSql = "SELECT *  FROM $vTable WHERE (row_id = '{$this->rowId}')";
+        $vSql = "SELECT *  FROM $vTable WHERE ({$this->rowField} = '{$this->rowId}')";
         $aAllRows = $this->getAllRows($vSql);
         $aAttributeId = array();
         if (!$aAllRows){
@@ -168,7 +174,8 @@ Class ProductEav
             return array();
 //            throw new \Exception('No Eav attribute found for ' . $this->iProductId);
         }
-        $vSql = "SELECT attribute_id,attribute_code FROM eav_attribute WHERE attribute_id IN ($vAttributeList)";
+        $eavAttributeTable = $this->resourceConnection->getTableName('eav_attribute');
+        $vSql = "SELECT attribute_id,attribute_code FROM $eavAttributeTable WHERE attribute_id IN ($vAttributeList)";
 
         $aAttributeList = $this->getPair($vSql);
         $aEavData = array();
