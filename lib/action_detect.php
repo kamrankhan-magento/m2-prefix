@@ -10,7 +10,7 @@ Class ZActionDetect
 {
     public static function callMethod($instance)
     {        $baseUrl = $_SERVER['REQUEST_URI'];
-
+        $timeStart = microtime(true);
         $instanceName = get_class($instance);
         if (!isset($_GET['action'])) {
             $error = new \ShowExceptionAsNormalMessage();
@@ -54,9 +54,12 @@ Class ZActionDetect
             }
             $aArguments[] = $argValue;
         }
-
         $aReturn = call_user_func_array([$instance, $methodName], $aArguments);
-        $aReturn = [$actionLabel => $aReturn];
+        $timeTaken = microtime(true) -$timeStart;
+        $aReturn = [
+            $actionLabel => $aReturn,
+            'time' => number_format($timeTaken,2),
+        ];
         return $aReturn;
     }
     public static function indexLink() : string
