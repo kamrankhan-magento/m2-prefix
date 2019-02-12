@@ -56,6 +56,9 @@ Class ProductEav
         }
 
         foreach ($aEav as $vStore => $aStoreData) {
+            if (!is_array($aStoreData)){
+                continue;
+            }
             foreach ($aStoreData as $k => $v) {
                 //normal
                 if (strpos($k,'store_id_')===false){
@@ -120,6 +123,10 @@ Class ProductEav
         $vTableName = $this->vEntityTable;
         $vSql  = "select $vAttribute from $vTableName WHERE entity_id = {$this->iProductId}";
         $aReturn = $this->getRow($vSql);
+        if (!$aReturn){
+            throw new \Exception("product_id {$this->iProductId}  not found in the database");
+        }
+
         if (count(array_keys($aReturn)) == 1){
             return current($aReturn);
         }

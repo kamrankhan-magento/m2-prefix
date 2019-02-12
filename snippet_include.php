@@ -145,7 +145,13 @@ HTML;
     {
         $magentoInc = $this->getMagentoInc();
         $bExecuteNow = true;
-        require $path;
+        try{
+            require $path;
+        }catch(\Exception $e){
+            \zain_custom\lib\ErrorPrinting::showException($e);
+            !d($e->getFile(). ':' . $e->getLine());
+            throw $e;
+        }
     }
 }
 

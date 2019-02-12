@@ -61,5 +61,14 @@ class ErrorPrinting {
             $vRootDirectory = dirname($vRootDirectory);
         }
     }
+    public static function showException(\Exception $e)
+    {
+        echo "Go to error: "  . $e->getMessage() . " " . \zain_custom\lib\ErrorPrinting::getPhpStormLine($e->getFile(),$e->getLine()) . "<br/>\n";
+        if ($e instanceOf \ReflectionException ){
+            if ($previous = $e->getPrevious()){
+                echo self::showException($previous);
+            }
+        }
+    }
 
 }

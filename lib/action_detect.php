@@ -9,7 +9,9 @@ Class ShowExceptionAsNormalMessage extends \Exception
 Class ZActionDetect
 {
     public static function callMethod($instance)
-    {        $baseUrl = $_SERVER['REQUEST_URI'];
+    {
+        $baseUrl = $_SERVER['REQUEST_URI'];
+        echo "<a href='/?op=snippets'>Snippets</a>\n<br/><br/>\n";
         $timeStart = microtime(true);
         $instanceName = get_class($instance);
         if (!isset($_GET['action'])) {
@@ -22,7 +24,7 @@ Class ZActionDetect
             }, $methods);
             $methodList = array_filter($methodList);
             $error->errorData = ["available Methods for $instanceName are" => $methodList];
-            $error->rawMessage = self::fillActionUrls($methodList);
+            $error->rawMessage = self::fillActionUrls($methodList,$class->getFileName());
             throw $error;
         }
         $action = $_GET['action'] ?? 'main';
@@ -32,10 +34,9 @@ Class ZActionDetect
         if (!is_callable([$instance, $methodName])) {
             throw new \NoActionException($vMessage);
         }
-
+        echo self::indexLink() . "<br/><br/>\n";
         $r = new \ReflectionMethod($instanceName, $methodName);
         echo self::phpStormMethodLinks($r, $actionLabel) . "<br/>\n";
-        echo self::indexLink() . "<br/>\n";
         $params = $r->getParameters();
         $aArguments = [];
         foreach ($params as $param) {
@@ -46,7 +47,7 @@ Class ZActionDetect
                     $argValue = $param->getDefaultValue();
                 }
                 else {
-                    throw new \ShowExceptionAsNormalMessage("param $paramName missing for $actionLabel");
+                    throw new \ShowExceptionAsNormalMessage("$paramName parameter missing for $actionLabel");
                 }
             }
             else {
@@ -85,21 +86,34 @@ Class ZActionDetect
         return "<a href='http://localhost:8091/?message=$fileName:$firstLine'>$label</a> 
  ---- <a href='http://localhost:8091/?message=$fileName:$lastLine'>end</a>";
     }
+    public static function fileLink($fileName): string
+    {
+        $fileName = self::removeFilePrefix($fileName);
+        return "Navigate to: <a href='http://localhost:8091/?message=$fileName'>$fileName</a>";
+    }
     protected static function removeFilePrefix(string $fileName):string
     {
         $vPrefix = '/vagrant/';
         if (strpos($fileName,$vPrefix) === 0){
             $fileName = substr($fileName,strlen($vPrefix));
         }
+        else{
+//            $basePath = dirname(dirname(dirname(__DIR__)));
+            $basePath = dirname(__DIR__);
+            $fileName = ltrim(str_replace($basePath,'',$fileName),'/');
+        }
         return $fileName;
     }
 
-    public static function fillActionUrls(array $actions)
+    public static function fillActionUrls(array $actions,$fileName)
     {
         $baseUrl = $_SERVER['REQUEST_URI'];
         $actionLinks = array_map(function (string $functionName) use ($baseUrl) {
             return "<a href='$baseUrl&action=$functionName'>$functionName</a>";
         }, $actions);
+        if ($fileName){
+            $actionLinks[] = self::fileLink($fileName);
+        }
         return implode("<br/>\n", $actionLinks);
     }
 }
