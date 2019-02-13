@@ -36,11 +36,11 @@ function getAll($snippetsPath,$prefix = '')
     $vLinks = linkToString($aLinks);
     return $vLinks;
 }
-
+echo "project snippets<br/><br/>";
 $targetPath = dirname(__DIR__) . '/snippets';
 echo getAll($targetPath);
 
-echo "<hr/><br/>pre-paths<br/> <br/>\n";
+echo "<hr/><br/>non-magento snippets<br/> <br/>\n";
 $targetPath =dirname(__DIR__) . '/snippets_core_pre';
 echo getAll($targetPath);
 

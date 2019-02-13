@@ -8,6 +8,20 @@ Class ShowExceptionAsNormalMessage extends \Exception
 
 Class ZActionDetect
 {
+    static function listMethods($instanceName)
+    {
+        $error = new \ShowExceptionAsNormalMessage();
+        $class = new \ReflectionClass($instanceName);
+        $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
+        $methodList = array_map(function (\ReflectionMethod $method) {
+            $name = $method->getName();
+            return ($name == '__construct') ? '' : $name;
+        }, $methods);
+        $methodList = array_filter($methodList);
+        $error->errorData = ["available Methods for $instanceName are" => $methodList];
+        $error->rawMessage = self::fillActionUrls($methodList,$class->getFileName());
+        throw $error;
+    }
     public static function callMethod($instance)
     {
         $baseUrl = $_SERVER['REQUEST_URI'];
@@ -15,24 +29,17 @@ Class ZActionDetect
         $timeStart = microtime(true);
         $instanceName = get_class($instance);
         if (!isset($_GET['action'])) {
-            $error = new \ShowExceptionAsNormalMessage();
-            $class = new \ReflectionClass($instanceName);
-            $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
-            $methodList = array_map(function (\ReflectionMethod $method) {
-                $name = $method->getName();
-                return ($name == '__construct') ? '' : $name;
-            }, $methods);
-            $methodList = array_filter($methodList);
-            $error->errorData = ["available Methods for $instanceName are" => $methodList];
-            $error->rawMessage = self::fillActionUrls($methodList,$class->getFileName());
-            throw $error;
+            self::listMethods($instanceName);
         }
         $action = $_GET['action'] ?? 'main';
         $methodName = $action ?: 'main';
         $actionLabel = "$instanceName->$methodName()";
         $vMessage = "Unable to call  $actionLabel";
-        if (!is_callable([$instance, $methodName])) {
-            throw new \NoActionException($vMessage);
+        if (!is_callable([$instance, $methodName])){
+            self::displayError($vMessage);
+            echo "<br/><br/>";
+            //auto throws error to get out of the loop
+            self::listMethods($instanceName);
         }
         echo self::indexLink() . "<br/><br/>\n";
         $r = new \ReflectionMethod($instanceName, $methodName);
@@ -62,6 +69,10 @@ Class ZActionDetect
             'time' => number_format($timeTaken,2),
         ];
         return $aReturn;
+    }
+    static protected function displayError($vMessage)
+    {
+        echo "<div style='color: red'>$vMessage</div>";
     }
     public static function indexLink() : string
     {
