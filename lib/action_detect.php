@@ -15,10 +15,11 @@ Class ZActionDetect
         $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
         $methodList = array_map(function (\ReflectionMethod $method) {
             $name = $method->getName();
-            return ($name == '__construct') ? '' : $name;
+            return ($name == '__construct') ? [] : ['name'=>$name,'method'=>$method];
         }, $methods);
         $methodList = array_filter($methodList);
-        $error->errorData = ["available Methods for $instanceName are" => $methodList];
+        $methodList = array_column($methodList,'method','name');
+        $error->errorData = ["available Methods for $instanceName are" => array_keys($methodList)];
         $error->rawMessage = self::fillActionUrls($methodList,$class->getFileName());
         throw $error;
     }
@@ -87,15 +88,16 @@ Class ZActionDetect
         return $link;
     }
     public static function phpStormMethodLinks(\ReflectionMethod $method,
-                                               string $label): string
+                                               string $label,
+                                                bool $includeEnd = true): string
     {
         $firstLine = $method->getStartLine() +2;
         $lastLine = $method->getEndLine()-2;
         $fileName = $method->getFileName();
         $fileName = self::removeFilePrefix($fileName);
         //<a class="kint-ide-link" href="http://localhost:8091/?message=/vagrant/pub/zain_custom/lib/action_detect.php:63">&lt;ROOT&gt;/zain_custom/lib/action_detect.php:63</a>
-        return "<a href='http://localhost:8091/?message=$fileName:$firstLine'>$label</a> 
- ---- <a href='http://localhost:8091/?message=$fileName:$lastLine'>end</a>";
+        $end = $includeEnd ? "  ---- <a href='http://localhost:8091/?message=$fileName:$lastLine'>end</a>": '';
+        return "<a href='http://localhost:8091/?message=$fileName:$firstLine'>$label</a>$end";
     }
     public static function fileLink($fileName): string
     {
@@ -119,11 +121,12 @@ Class ZActionDetect
     public static function fillActionUrls(array $actions,$fileName)
     {
         $baseUrl = $_SERVER['REQUEST_URI'];
-        $actionLinks = array_map(function (string $functionName) use ($baseUrl) {
-            return "<a href='$baseUrl&action=$functionName'>$functionName</a>";
-        }, $actions);
+        $actionLinks = array_map(function (string $functionName,$method) use ($baseUrl) {
+            $methodLink = self::phpStormMethodLinks($method,'goto',false);
+            return "<a href='$baseUrl&action=$functionName'>$functionName</a>  <small>$methodLink</small>" ;
+        },array_keys($actions), $actions);
         if ($fileName){
-            $actionLinks[] = self::fileLink($fileName);
+            $actionLinks[] = self::fileLink($fileName) . '<small>' .   '</small>';
         }
         return implode("<br/>\n", $actionLinks);
     }
