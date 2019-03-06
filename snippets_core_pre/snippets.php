@@ -10,6 +10,10 @@ function phpPaths($snippetsPath,$prefix='')
         $fileName = $split[1];
         $extension = substr($fileName, -4);
         if ($extension == '.php') {
+            $firstFileNameChars = substr(basename($fileName),0,2);
+            if ($firstFileNameChars=='__'){
+                continue;
+            }
             $aPhpPath[$fileName] = $prefix . ltrim(pathinfo($fileName, PATHINFO_DIRNAME) . '/' . pathinfo($fileName, PATHINFO_FILENAME),'./');
         }
     }
