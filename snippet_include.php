@@ -5,6 +5,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 
 Class AutoInclude
 {
+    protected $programmaticSnippetPath;
     protected function start()
     {
         error_reporting(E_ALL);
@@ -14,7 +15,7 @@ Class AutoInclude
 
     protected function getSnippetName()
     {
-        return $_GET['op'];
+        return $this->programmaticSnippetPath ?: $_GET['op'];
     }
 
     protected function getSnippetPath()
@@ -59,7 +60,12 @@ Class AutoInclude
     {
         $path = $this->getSnippetPath();
         if (!file_exists($path)) {
-            throw new Exception(($path) . ' does not exist');
+            $this->includeKnit();
+            !d("$path does not exist");
+            !d("attempting  /?op=snippets");
+//            throw new Exception(($path) . ' does not exist');
+            $this>$this->programmaticSnippetPath = 'snippets';
+            $this->addPreSnippet();
         }
     }
 
