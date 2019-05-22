@@ -41,6 +41,12 @@
     <type name="{{target_class}}">
         <arguments>
             <argument name="logger" xsi:type="object">{{type_name_logger}}</argument>
+            <!--
+
+                In your target class {{target_class}} __construct() add variable named $logger
+                with type \Psr\Log\LoggerInterface
+                if you need to change variable name, need to change it in di.xml too
+                -->
         </arguments>
     </type>
 </config>
