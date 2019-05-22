@@ -11,16 +11,23 @@ Class ZActionDetect
     static function listMethods($instanceName)
     {
         $error = new \ShowExceptionAsNormalMessage();
-        $class = new \ReflectionClass($instanceName);
-        $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
+        $reflectionClass = new \ReflectionClass($instanceName);
+        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
         $methodList = array_map(function (\ReflectionMethod $method) {
             $name = $method->getName();
             return ($name == '__construct') ? [] : ['name'=>$name,'method'=>$method];
         }, $methods);
         $methodList = array_filter($methodList);
         $methodList = array_column($methodList,'method','name');
-        $error->errorData = ["available Methods for $instanceName are" => array_keys($methodList)];
-        $error->rawMessage = self::fillActionUrls($methodList,$class->getFileName());
+        $error->errorData = [];
+        if ($docBlock = $reflectionClass->getDocComment()){
+            if (!strpos($docBlock,'* To replace')){
+                $error->errorData['doc'] = $docBlock;
+            }
+        }
+
+        $error->errorData["available Methods for $instanceName are"] = array_keys($methodList);
+        $error->rawMessage = self::fillActionUrls($methodList,$reflectionClass->getFileName());
         throw $error;
     }
     public static function callMethod($instance)
