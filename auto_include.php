@@ -32,6 +32,12 @@ Class RequestNotFound
         if (in_array($vRequest, ['/favicon.ico'])) {
             return true;
         }
+        $vExtension = strtolower(pathinfo($vRequest, PATHINFO_EXTENSION));
+        if (in_array($vExtension,[
+            'jpeg','jpg','gif','png','pdf',
+        ])){
+            return true;
+        };
     }
 
     function process()
