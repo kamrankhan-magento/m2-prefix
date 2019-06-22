@@ -28,7 +28,7 @@ Class RequestNotFound
 
     private function ignoreThisRequest()
     {
-        $vRequest = $_SERVER['REQUEST_URI'];
+        $vRequest = $_SERVER['REQUEST_URI'] ?? '';
         if (in_array($vRequest, ['/favicon.ico'])) {
             return true;
         }

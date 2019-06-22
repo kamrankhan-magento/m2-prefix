@@ -73,7 +73,12 @@ Class AutoInclude
     {
 
         try {
-            require __DIR__ . '/../../app/bootstrap.php';
+            if ($realBotStrapPath = realpath(__DIR__ . '/../app/bootstrap.php')){
+                require $realBotStrapPath;
+            }
+            else{
+                require __DIR__ . '/../../app/bootstrap.php';
+            }
         } catch (\Exception $e) {
             echo <<<HTML
 <div style="font:12px/1.35em arial, helvetica, sans-serif;">
