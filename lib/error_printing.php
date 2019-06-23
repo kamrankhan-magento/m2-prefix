@@ -66,7 +66,12 @@ class ErrorPrinting {
         echo "Go to error: "  . $e->getMessage() . " " . \zain_custom\lib\ErrorPrinting::getPhpStormLine($e->getFile(),$e->getLine()) . "<br/>\n";
         if ($e instanceOf \ReflectionException ){
             if ($previous = $e->getPrevious()){
-                echo self::showException($previous);
+                if ($previous instanceof \Exception){
+                    echo self::showException($previous);
+                }
+                else{
+                    var_dump($previous);
+                }
             }
         }
     }
