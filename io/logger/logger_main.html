@@ -12,7 +12,6 @@
    if you already have config simply copy paste parts below
    and  \Psr\Log\LoggerInterface $logger, in target class {{target_class}}
 -->
-    <preference for="Psr\Log\LoggerInterface" type="{{type_name_handler}}"/>
     <virtualType name="{{type_name_handler}}" type="Magento\Framework\Logger\Handler\Base">
         <arguments>
             <argument name="fileName" xsi:type="string">{{filename}}</argument>
