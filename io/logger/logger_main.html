@@ -55,23 +55,39 @@
     <type name="{{target_class}}">
         <arguments>
             <argument name="logger" xsi:type="object">{{type_name_logger}}</argument>
+            <!--
+
+                In your target class {{target_class}} __construct() add variable named $logger
+                with type \Psr\Log\LoggerInterface
+                if you need to change variable name, need to change it in di.xml too
+                -->
         </arguments>
     </type>
 </config>
 </script>
-<textarea rows="30" cols="50" id="input">
+<textarea rows="15" cols="160" id="input">
 
 </textarea>
+<br/>
+<br/>
+put the generated xml in module's <code>di.xml</code> <br/>
+in target class <code>__construct()</code> add a new argument <code>\Psr\Log\LoggerInterface $logger</code>
+
+<br/>
 <textarea cols="100" rows="25" id="output"> some large</textarea>
 <script>
     let input = {
         type_name_logger: 'ZLoggable',
+        type_name_logger_comments: 'Above will be used as name of virtual type extending Monolog\\Logger and then passed to target class as an argument',
         type_name_handler: 'ZLogHandler',
+        type_name_handler_comments: 'Above will be used as name of virtual type extending Magento\\Framework\\Logger\\Handler\\Base so it can handle logs using a different file',
         filename: '/var/log/z_custom.log',
+        filename_comments: 'filename which is passed to new Handler so log is written to that file',
         target_class: 'NameSpace\\Module\\Model\\TargetClass',
+        target_class_comments: 'Name of the class where new virtual type is passed as argument name logger, (you can change name manually)',
         name: 'z_custom',
         //\Monolog\Logger::__construct
-        comments: 'name is just used as a prefix to line entry if multiple logs are writing on same file'
+        name_comments: 'virtual type of Monolog\\Logger has a name argument. When a line is logged, name is also inserted along with date time'
     };
     $('#input').val(JSON.stringify(input, null, 2));
 
@@ -86,5 +102,7 @@
     $('#input').on('change keyup paste', changeElement);
 
 </script>
+
+
 </body>
 </html>

@@ -107,6 +107,7 @@ Class ZCreateOrder
         // if you have allready buyer id then you can load customer directly
         $customer = $this->customerRepository->getById($customer->getEntityId());
         $quote->setCurrency();
+        $quote->setData('authority_to_leave',1);
         $quote->assignCustomer($customer); //Assign quote to customer
 
         //add items in quote
@@ -132,7 +133,7 @@ Class ZCreateOrder
         $shippingAddress->setCollectShippingRates(true)
             ->collectShippingRates()
             ->setShippingMethod($vShippingMethodCode); //shipping method
-        $quote->setInventoryProcessed(false); //not effetc inventory
+//        $quote->setInventoryProcessed(false); //not effect inventory
         $quote->setWebsite($website);
         $quote->setStoreId($oDefaultStore->getId());
         $quote->save(); //Now Save quote and your quote is ready

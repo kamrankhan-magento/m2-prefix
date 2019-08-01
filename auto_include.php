@@ -1,72 +1,76 @@
 <?php
-if (!isset($_GET) || empty($_GET['op'])){
-    return ;
-}
-$vSnippetName = $_GET['op'];
-$vSnippetFile = __DIR__ . "/snippets/{$vSnippetName}.php";
-require_once __DIR__ . "/lib/fatal_inc.php";
-$vKnitPath = __DIR__ . "/lib/kint_inc.php";
-if (!file_exists($vSnippetFile)){
-    $vCorePreSnippet = __DIR__ . "/snippets_core_pre/{$vSnippetName}.php";
-    if (file_exists($vCorePreSnippet)){
-        require $vKnitPath;
-        require($vCorePreSnippet);
-        exit;
-    }
-    if ($_SERVER['REQUEST_URI'] == '/?op=' . $_GET['op']){
-        throw new Exception(($vSnippetFile) . 'does not exist');
-    }
-    return ;
-}
-require $vKnitPath;
-/**
- * Public alias for the application entry point
- *
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
-
-use Magento\Framework\App\Bootstrap;
-use Magento\Framework\App\Filesystem\DirectoryList;
-
-try {
-    require __DIR__ . '/../../app/bootstrap.php';
-} catch (\Exception $e) {
-    echo <<<HTML
+if (!defined('PHP_VERSION_ID') || !(PHP_VERSION_ID === 70002 || PHP_VERSION_ID === 70004 || PHP_VERSION_ID >= 70006)) {
+    if (PHP_SAPI == 'cli') {
+        echo 'Magento supports 7.0.2, 7.0.4, and 7.0.6 or later. ' .
+            'Please read http://devdocs.magento.com/guides/v2.2/install-gde/system-requirements.html';
+    } else {
+        echo <<<HTML
 <div style="font:12px/1.35em arial, helvetica, sans-serif;">
-    <div style="margin:0 0 25px 0; border-bottom:1px solid #ccc;">
-        <h3 style="margin:0;font-size:1.7em;font-weight:normal;text-transform:none;text-align:left;color:#2f2f2f;">
-        Autoload error</h3>
-    </div>
-    <p>{$e->getMessage()}</p>
+    <p>Magento supports PHP 7.0.2, 7.0.4, and 7.0.6 or later. Please read
+    <a target="_blank" href="http://devdocs.magento.com/guides/v2.2/install-gde/system-requirements.html">
+    Magento System Requirements</a>.
 </div>
 HTML;
+    }
     exit(1);
 }
 
-$params = $_SERVER;
-$params[Bootstrap::INIT_PARAM_FILESYSTEM_DIR_PATHS] = [
-    DirectoryList::PUB => [DirectoryList::URL_PATH => ''],
-    DirectoryList::MEDIA => [DirectoryList::URL_PATH => 'media'],
-    DirectoryList::STATIC_VIEW => [DirectoryList::URL_PATH => 'static'],
-    DirectoryList::UPLOAD => [DirectoryList::URL_PATH => 'media/upload'],
-];
 
-class TestApp
-    extends \Magento\Framework\App\Http
-    implements \Magento\Framework\AppInterface {
-
-    public function getObjectManager()
+Class RequestNotFound
+{
+    private function sendResourceNotFound()
     {
-        return $this->_objectManager;
+        $vRequest = $_SERVER['REQUEST_URI'];
+        header("HTTP/1.0 404 Not Found");
+        echo "PHP continues $vRequest .\n";
+        die();
+    }
+
+    private function ignoreThisRequest()
+    {
+        $vRequest = $_SERVER['REQUEST_URI'] ?? '';
+        if (in_array($vRequest, ['/favicon.ico'])) {
+            return true;
+        }
+        $vExtension = strtolower(pathinfo($vRequest, PATHINFO_EXTENSION));
+        if (in_array($vExtension,[
+            'jpeg','jpg','gif','png','pdf',
+        ])){
+            return true;
+        };
+    }
+
+    function process()
+    {
+        if ($this->ignoreThisRequest()) {
+            $this->sendResourceNotFound();
+        }
     }
 }
-$bootstrap = \Magento\Framework\App\Bootstrap::create(BP, $params);
-/** @var \Magento\Framework\App\Http $app */
-//$app = $bootstrap->createApplication(\Magento\Framework\App\Http::class);
-/** @var TestApp $app */
-$app = $bootstrap->createApplication('TestApp');
-require_once __DIR__ . "/lib/magento_inc.php";
-$bExecuteNow = true;
-require $vSnippetFile;
+
+$requestNotFound = new \RequestNotFound();
+$requestNotFound->process();
+
+Class ZInc
+{
+    static function dInc($depth = 4)
+    {
+        $vKnitPath = __DIR__ . "/lib/kint_inc.php";
+        require_once $vKnitPath;
+        \Kint::$max_depth = $depth;
+    }
+    static function InternalLog()
+    {
+        $vFunctionPath = __DIR__ . '/profile/InternalLog.php';
+        require_once $vFunctionPath;
+    }
+}
+
+
+if (!isset($_GET) || empty($_GET['op'])) {
+    return;
+}
+
+require_once __DIR__ . '/lib/ZReflection.php';
+require_once __DIR__ . '/snippet_include.php';
 die;
