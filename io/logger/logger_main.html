@@ -8,9 +8,10 @@
 <script id="entry-template" type="text/x-handlebars-template">
     <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
 <!--
-   if you already have config simply copy paste parts below
-   and  \Psr\Log\LoggerInterface $logger, in target class {{target_class}}
+    if you already have config simply copy paste parts below
+    and  \Psr\Log\LoggerInterface $logger, in target class {{target_class}}
 -->
     <virtualType name="{{type_name_handler}}" type="Magento\Framework\Logger\Handler\Base">
         <arguments>
@@ -41,7 +42,7 @@
         </arguments>
     </virtualType>
         <!--
-            In your target class {{target_class}}
+            In your target class {{target_class}} constructor __construct()
             add new argument
             \Psr\Log\LoggerInterface $logger,
 
@@ -55,12 +56,6 @@
     <type name="{{target_class}}">
         <arguments>
             <argument name="logger" xsi:type="object">{{type_name_logger}}</argument>
-            <!--
-
-                In your target class {{target_class}} __construct() add variable named $logger
-                with type \Psr\Log\LoggerInterface
-                if you need to change variable name, need to change it in di.xml too
-                -->
         </arguments>
     </type>
 </config>
