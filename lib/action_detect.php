@@ -4,6 +4,7 @@ Class ShowExceptionAsNormalMessage extends \Exception
 {
     public $errorData = [];
     public $rawMessage = '';
+    public $collapse = false;
 }
 
 Class ZActionDetect
@@ -12,6 +13,7 @@ Class ZActionDetect
     {
         $error = new \ShowExceptionAsNormalMessage();
         $reflectionClass = new \ReflectionClass($instanceName);
+        $error->collapse = true;
         $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
         $methodList = array_map(function (\ReflectionMethod $method) {
             $name = $method->getName();
@@ -77,6 +79,36 @@ Class ZActionDetect
             'time' => number_format($timeTaken,2),
         ];
         return $aReturn;
+    }
+    public static function showOutput(string $className,\MagentoInc $magentoIncGiven)
+    {
+        if (empty($GLOBALS['just_include_snippet_class'])) {
+
+            $instanceName = $magentoIncGiven->getObjectFromName($className);
+
+            try {
+                $outcome = ZActionDetect::callMethod($instanceName);
+                $functionCalled = key($outcome);
+                $valueReturned = current($outcome);
+                !d($valueReturned);
+                echo "Function Called: <span style='background: #e0eaef'>$functionCalled</span><br/>\n" ;
+                if (isset($outcome['time'])){
+                    $timeTakenByMethod = $outcome['time'];
+                    echo "Time Taken: <span style='background: #e0eaef'><b>$timeTakenByMethod</b></span><br/>\n";
+                }
+            } catch (\ShowExceptionAsNormalMessage $e) {
+                $message = $e->errorData ?: $e->getMessage();
+                if ($e->rawMessage) {
+                    echo $e->rawMessage;
+                }
+                if ($e->collapse){
+                    d($message);
+                }
+                else{
+                    !d($message);
+                }
+            }
+        }
     }
     static protected function displayError($vMessage)
     {

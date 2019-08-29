@@ -8,3 +8,11 @@ $state->setAreaCode(\Magento\Framework\App\Area::AREA_FRONTEND);
 /** @var \Magento\Catalog\Model\ProductRepository $product */
 $productRepo = $objectManager->get('\Magento\Catalog\Model\ProductRepository');
 $product = $productRepo->getById($iProductId);
+
+
+
+/** @var \Magento\Framework\Filesystem\DirectoryList $directoryList */
+$directoryList = $objectManager->get('\Magento\Framework\Filesystem\DirectoryList');
+$varPath = $directoryList->getPath('var');
+$deployRoot = dirname(dirname(dirname(dirname($varPath))));
+$sharedStockistPath = realpath($deployRoot . '/shared/public/pub/stockist/stockists_brands.txt');
