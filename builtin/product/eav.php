@@ -16,6 +16,8 @@ Class ProductEav
     protected $bShowTable = false;
     protected $rowId ;
     protected $rowField = 'row_id';
+    protected $entityTable = 'catalog_product_entity';
+    protected $_cachedTablePrefix ;
     /**
      * @var
      * customer_entity
@@ -30,7 +32,6 @@ Class ProductEav
     public function __construct(\Magento\Framework\App\ResourceConnection $resourceConnection)
     {
         $this->resourceConnection = $resourceConnection;
-        $this->init(false,false,'catalog_product_entity');
     }
 
     protected function init($bShowAttributeId, $bShowTable, $vEntityTable)
@@ -118,13 +119,42 @@ Class ProductEav
         }
         return $this->inspectFilter($filter);
     }
+    public function getTablePrefix()
+    {
+        //its not needed already calculating
+        if (is_null($this->_cachedTablePrefix)){
+            $vSql  = "show tables;";
+            $aReturn = $this->getAllRows($vSql);
+            $entityLength = strlen($this->entityTable);
+            foreach ($aReturn as $tableData) {
+                $tableName = current($tableData);
+                if (substr($tableName,-$entityLength) == $this->entityTable){
+                    $this->_cachedTablePrefix =  substr($tableName,0,strlen($tableName)-$entityLength);
+                    break;
+                }
+            }
+            $this->_cachedTablePrefix = $this->_cachedTablePrefix ?: '';
+        }
+
+        return $this->_cachedTablePrefix;
+    }
+    public function inspectCustomer($customerId, $filter)
+    {
+        $this->iProductId = $customerId;
+        $this->entityTable = 'customer_entity';
+        if ($filter=='*'){
+            return $this->inspect();
+        }
+        return $this->inspectFilter($filter);
+    }
     protected function inspectMain($vAttribute = '*')
     {
+        $this->init(false,false,$this->entityTable);
         $vTableName = $this->vEntityTable;
         $vSql  = "select $vAttribute from $vTableName WHERE entity_id = {$this->iProductId}";
         $aReturn = $this->getRow($vSql);
         if (!$aReturn){
-            throw new \Exception("product_id {$this->iProductId}  not found in the database");
+            throw new \Exception("product_id {$this->iProductId}  not found in the database $vSql");
         }
 
         if (count(array_keys($aReturn)) == 1){
