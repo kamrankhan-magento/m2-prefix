@@ -1,5 +1,7 @@
 <?php
 
+use Magento\Framework\App\Area;
+
 Class MagentoInc
 {
     /**
@@ -53,6 +55,19 @@ Class MagentoInc
         $this->storeManager->setCurrentStore('admin');
         $this->registry->register('isSecureArea', true);
         $this->bStateSet = true;
+    }
+    //don't call it in boot time, call it just before
+    public function setFrontEndStore(string $storeCode = 'default')
+    {
+        if ($this->bStateSet) {
+            return false;
+        }
+        $this->storeManager->setCurrentStore($storeCode);
+        $this->bStateSet = true;
+    }
+    public function setState($area = Area::AREA_FRONTEND)
+    {
+        $this->state->setAreaCode($area);
     }
 
     public function setRestApiArea()

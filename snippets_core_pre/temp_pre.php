@@ -5,4 +5,4 @@ if (function_exists('yaml_parse')){
 else{
     echo "<br/> not exists  File:" . __FILE__ . " line:" . __LINE__ . "<br/>\r\n";
 }
-d(1);
+!d(1);

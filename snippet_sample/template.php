@@ -3,19 +3,16 @@ $initialClasses = get_declared_classes();
 
 $magentoInc->setAdminHtml();
 
-Class ClassName
+class ClassName
 {
-
-    function __construct()
+    public function __construct()
     {
-
     }
 
-    public function main()
+    public function test()
     {
         return 1;
     }
 }
 
-
-ZActionDetect::showOutput(end($initialClasses),$magentoInc);
+ZActionDetect::showOutput(end($initialClasses), $magentoInc);
