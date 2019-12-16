@@ -72,7 +72,14 @@ Class ZActionDetect
             }
             $aArguments[] = $argValue;
         }
-        $aReturn = call_user_func_array([$instance, $methodName], $aArguments);
+        try {
+            $aReturn = call_user_func_array([$instance, $methodName], $aArguments);
+        }
+        catch (\Exception $e){
+            !d($e);
+            die;
+        }
+
         $timeTaken = microtime(true) -$timeStart;
         $aReturn = [
             $actionLabel => $aReturn,
